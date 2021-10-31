@@ -54,18 +54,18 @@ app.get('/register',(req,res)=>{
 })
 app.get('/secrets',(req,res)=>{
       if(req.isAuthenticated()){
-            res.render('/secrets')
+            res.render('secrets')
       }else{
             res.redirect('/login')
       }
 })
 app.post('/register',(req,res)=>{
-User.register({username:req.body.username},req.body.password,(err,user)=>{
-      if(err){
-            console.log(err);
-            res.redirect("/register");
-      }else{
-            passport.authenticate('local')(req,res,function(){
+      User.register({username:req.body.username},req.body.password,(err,user)=>{
+            if(err){
+                  console.log(err);
+                  res.redirect("/register");
+            }else{
+                  passport.authenticate('local')(req,res,function(){
                   res.redirect('/secrets')
             })
       }
@@ -73,8 +73,26 @@ User.register({username:req.body.username},req.body.password,(err,user)=>{
     
 })
 app.post('/login',(req,res)=>{
-     
+      const user = new User({
+            username : req.body.username,
+            passport : req.body.password
+      })
+      req.login(user,(err)=>{
+            if(err){
+                  console.log(err);
+            }else{
+                  passport.authenticate('local')(req,res,()=>{
+                        res.redirect('/secrets')
+                  });
+            }
+      })    
 })
+app.get('/logout',(req,res)=>{
+      req.logOut();
+      res.redirect('/');
+});
+
+
 app.listen(808,()=>{
       console.log('Server running on port 808');
-})
+});
